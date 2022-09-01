@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import haversine as hs
@@ -162,23 +161,23 @@ def get_analysis(edcs):
                            ((edcs['mulieres'] == 1) |
                             (edcs['gender_main_pers'] == 1))]['distance'].mean()
     f_distance_median = edcs[(edcs['ignore'] == 0) &
-                           ((edcs['mulieres'] == 1) |
-                            (edcs['gender_main_pers'] ==
-                             1))]['distance'].median()
+                             ((edcs['mulieres'] == 1) |
+                              (edcs['gender_main_pers'] ==
+                               1))]['distance'].median()
     f_distance_mode = edcs[(edcs['ignore'] == 0) &
                            ((edcs['mulieres'] == 1) |
                             (edcs['gender_main_pers'] ==
                              1))]['distance'].mode(dropna=True)
     f_distance_stdev = edcs[(edcs['ignore'] == 0) &
-                           ((edcs['mulieres'] == 1) |
+                            ((edcs['mulieres'] == 1) |
                             (edcs['gender_main_pers'] == 1))]['distance'].std()
     f_distance_min = edcs[(edcs['ignore'] == 0) &
-                           ((edcs['mulieres'] == 1) |
-                            (edcs['gender_main_pers'] ==
-                             1))]['distance'].min(skipna=True)
+                          ((edcs['mulieres'] == 1) |
+                           (edcs['gender_main_pers'] ==
+                            1))]['distance'].min(skipna=True)
     f_distance_max = edcs[(edcs['ignore'] == 0) &
-                           ((edcs['mulieres'] == 1) |
-                            (edcs['gender_main_pers'] == 1))]['distance'].max()
+                          ((edcs['mulieres'] == 1) |
+                           (edcs['gender_main_pers'] == 1))]['distance'].max()
     f_funerary = edcs[(edcs['ignore'] == 0) &
                       ((edcs['mulieres'] == 1) |
                        (edcs['gender_main_pers'] == 1))]['funerary'].sum()
@@ -190,23 +189,23 @@ def get_analysis(edcs):
                            ((edcs['viri'] == 1) |
                             (edcs['gender_main_pers'] == 0))]['distance'].mean()
     m_distance_median = edcs[(edcs['ignore'] == 0) &
-                           ((edcs['viri'] == 1) |
-                            (edcs['gender_main_pers'] ==
-                             0))]['distance'].median()
+                             ((edcs['viri'] == 1) |
+                              (edcs['gender_main_pers'] ==
+                               0))]['distance'].median()
     m_distance_mode = edcs[(edcs['ignore'] == 0) &
                            ((edcs['viri'] == 1) |
                             (edcs['gender_main_pers'] ==
                              0))]['distance'].mode(dropna=True)
     m_distance_stdev = edcs[(edcs['ignore'] == 0) &
-                           ((edcs['viri'] == 1) |
-                            (edcs['gender_main_pers'] == 0))]['distance'].std()
+                            ((edcs['viri'] == 1) |
+                             (edcs['gender_main_pers'] == 0))]['distance'].std()
     m_distance_min = edcs[(edcs['ignore'] == 0) &
-                           ((edcs['viri'] == 1) |
-                            (edcs['gender_main_pers'] ==
-                             0))]['distance'].min(skipna=True)
+                          ((edcs['viri'] == 1) |
+                           (edcs['gender_main_pers'] ==
+                            0))]['distance'].min(skipna=True)
     m_distance_max = edcs[(edcs['ignore'] == 0) &
-                           ((edcs['viri'] == 1) |
-                            (edcs['gender_main_pers'] == 0))]['distance'].max()
+                          ((edcs['viri'] == 1) |
+                           (edcs['gender_main_pers'] == 0))]['distance'].max()
     m_funerary = edcs[(edcs['ignore'] == 0) &
                       ((edcs['viri'] == 1) |
                        (edcs['gender_main_pers'] == 0))]['funerary'].sum()
@@ -236,16 +235,23 @@ def get_analysis(edcs):
 
     print("Mode all distances: ", statistics.mode(edcs['distance']))
     print("Mode women: ", statistics.mode(edcs[(edcs['ignore'] == 0) &
-                  ((edcs['mulieres'] == 1) |
-                   (edcs['gender_main_pers'] == 1))]['distance']))
+                                               ((edcs['mulieres'] == 1) |
+                                                (edcs['gender_main_pers'] ==
+                                                 1))]['distance']))
     print("Mode men: ", statistics.mode(edcs[(edcs['ignore'] == 0) &
-                  ((edcs['viri'] == 1) |
-                   (edcs['gender_main_pers'] == 0))]['distance']))
+                                             ((edcs['viri'] == 1) |
+                                              (edcs['gender_main_pers'] ==
+                                               0))]['distance']))
 
     return edcs
 
 
 def ignore_duplicates(edcs):
+    """
+    Takes in a pandas dataframe containing the EDCS database.
+    Identifies and marks duplicates.
+    Returnes updated dataframe.
+    """
     edcs.sort_values(by='edcs-id', inplace=True)
     edcs['ignore'] = 0
     for idx, elem in edcs.iterrows():
@@ -279,7 +285,26 @@ def ignore_duplicates(edcs):
     return edcs
 
 
+def get_metadata(edcs):
+    """
+    Takes in a pandas dataframe containing the EDCS database.
+    Calculates mean inscription dates and plots them as a histogram.
+    """
+    edcs['time_point'] = (edcs['time_from'] + edcs['time_to']) / 2
+
+    fig, ax = plt.subplots()
+    sns.histplot(data=edcs[edcs['migrant'] == 1], x='time_point', binwidth=20)
+    ax.set(xlabel='Date of Inscription', ylabel='',
+           title="Temporal Distribution of Inscription (mean date)")
+    ax.set_xlim(-200, 700)
+    plt.show()
+
+
 def plot_graphs(edcs):
+    """
+    Takes in a pandas dataframe containing the EDCS database.
+    Plots distance migrated dependend on gender in different plots.
+    """
     sns.set()
     sns.set_style('white')
 
@@ -294,7 +319,7 @@ def plot_graphs(edcs):
 
     fig, ax = plt.subplots()
     sns.kdeplot(data=edcs[-(edcs['gender_of_1st_Word'] == 2)], x='distance',
-                 hue='gender_of_1st_Word', ax=ax)
+                hue='gender_of_1st_Word', ax=ax)
     ax.set(yticklabels=[], xlabel='Distance (km)', ylabel='Density',
            title='Distance Migrated')
     ax.legend(loc='upper right', labels=['male', 'female'])
@@ -316,24 +341,6 @@ def plot_graphs(edcs):
     plt.show()
 
 
-def get_date_point(row):
-    if row['time_from'] is not np.nan and row['time_to'] is not np.nan:
-        return (row['time_from'] + row['time_to']) / 2
-    return np.nan
-
-
-def get_metadata(edcs):
-    # edcs['time_point'] = edcs.apply(lambda row: get_date_point(row), axis=1)
-    edcs['time_point'] = (edcs['time_from'] + edcs['time_to']) / 2
-
-    fig, ax = plt.subplots()
-    sns.histplot(data=edcs[edcs['migrant'] == 1], x='time_point', binwidth=20)
-    ax.set(xlabel='Date of Inscription', ylabel='',
-           title="Temporal Distribution of Inscription (mean date)")
-    ax.set_xlim(-200, 700)
-    plt.show()
-
-
 def analyse_inscriptions():
     """
     Organising function.
@@ -342,14 +349,13 @@ def analyse_inscriptions():
     Saves database.
     """
     today = datetime.today()
-    edcs = open_database(today, 'EDCS_Analysis_')
-    # edcs_gender = add_gender_keywords(edcs)
-    # edcs_dist = calc_distance(edcs_gender)
-    # edcs_analysis = get_analysis(edcs_dist)
-    # save_databse(edcs_analysis, "EDCS_Analysis", today, False)
-    # get_metadata(edcs)
-    plot_graphs(edcs)
-    # edcs_dist.to_csv('EDCS_Analysis.csv', encoding='utf-8')
+    edcs = open_database(today, 'EDCS_Master_')
+    edcs_gender = add_gender_keywords(edcs)
+    edcs_dist = calc_distance(edcs_gender)
+    edcs_analysis = get_analysis(edcs_dist)
+    get_metadata(edcs_analysis)
+    plot_graphs(edcs_analysis)
+    save_databse(edcs_analysis, "EDCS_Analysis", today, False)
 
 
 def main():
